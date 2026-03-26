@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PhotoCoach - Learn photography by practicing exposure settings on real scenes. Master ISO, aperture, and shutter speed interactively.">
+    <title>PhotoCoach — Master Your Exposure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loader-content">
+            <div class="camera-icon">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="6" y="18" width="52" height="36" rx="6" stroke="currentColor" stroke-width="2.5"/>
+                    <circle cx="32" cy="36" r="11" stroke="currentColor" stroke-width="2.5"/>
+                    <circle cx="32" cy="36" r="6" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3"/>
+                    <rect x="22" y="12" width="20" height="8" rx="3" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="48" cy="24" r="2.5" fill="currentColor"/>
+                </svg>
+            </div>
+            <h1 class="loader-title">PhotoCoach</h1>
+            <p class="loader-subtitle">Loading scenes...</p>
+            <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="app hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo">
+                    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="9" width="26" height="18" rx="3" stroke="currentColor" stroke-width="1.5"/>
+                        <circle cx="16" cy="18" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+                        <circle cx="16" cy="18" r="3" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2"/>
+                        <rect x="11" y="6" width="10" height="4" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+                    </svg>
+                    <span>PhotoCoach</span>
+                </div>
+            </div>
+            <div class="header-center">
+                <div id="scene-counter" class="scene-counter">
+                    <span id="current-scene-num">1</span>
+                    <span class="separator">/</span>
+                    <span id="total-scenes">12</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div id="score-display" class="score-display">
+                    <span class="score-label">Score</span>
+                    <span id="score-value" class="score-value">0</span>
+                </div>
+                <button id="btn-upload" class="btn-upload-header" title="Practice with your own photo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <span>Upload Photo</span>
+                </button>
+                <input type="file" id="file-input" accept="image/*" style="display:none">
+                <button id="btn-skip" class="btn-icon" title="Skip Scene">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5,4 15,12 5,20"/>
+                        <line x1="19" y1="5" x2="19" y2="19"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Viewfinder Panel -->
+            <section class="viewfinder-panel">
+                <div class="scene-info">
+                    <span id="scene-badge" class="scene-badge">Landscape</span>
+                    <h2 id="scene-title" class="scene-title">Golden Hour Hills</h2>
+                    <p id="scene-description" class="scene-desc">Capture this stunning golden hour landscape with rolling hills and dramatic sky.</p>
+                </div>
+                <div class="viewfinder-container">
+                    <div id="viewfinder" class="viewfinder">
+                        <img id="scene-image" src="" alt="Photography scene" class="scene-image"/>
+                        <div class="viewfinder-overlay">
+                            <div class="grid-lines">
+                                <div class="grid-line-h h1"></div>
+                                <div class="grid-line-h h2"></div>
+                                <div class="grid-line-v v1"></div>
+                                <div class="grid-line-v v2"></div>
+                            </div>
+                            <div class="focus-point"></div>
+                        </div>
+                        <div class="viewfinder-hud">
+                            <span id="hud-iso" class="hud-item">ISO 100</span>
+                            <span id="hud-aperture" class="hud-item">f/8</span>
+                            <span id="hud-shutter" class="hud-item">1/125</span>
+                            <span id="hud-ev" class="hud-item ev-indicator">EV 0</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Exposure Meter -->
+                <div class="exposure-meter">
+                    <div class="meter-label">Exposure Meter</div>
+                    <div class="meter-track">
+                        <div class="meter-marks">
+                            <span>-3</span><span>-2</span><span>-1</span><span>0</span><span>+1</span><span>+2</span><span>+3</span>
+                        </div>
+                        <div class="meter-bar">
+                            <div id="meter-needle" class="meter-needle"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Controls Panel -->
+            <section class="controls-panel">
+                <div class="controls-header">
+                    <h3>Camera Settings</h3>
+                    <button id="btn-reset" class="btn-reset" title="Reset Settings">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="1,4 1,10 7,10"/>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                        </svg>
+                        Reset
+                    </button>
+                </div>
+
+                <!-- ISO Control -->
+                <div class="control-group" id="control-iso">
+                    <div class="control-label-row">
+                        <label class="control-label">
+                            <span class="control-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="12" cy="12" r="4"/>
+                                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                                </svg>
+                            </span>
+                            ISO
+                        </label>
+                        <span id="iso-value" class="control-value">100</span>
+                    </div>
+                    <input type="range" id="iso-slider" class="slider" min="0" max="7" step="1" value="0">
+                    <div class="slider-labels">
+                        <span>100</span><span>200</span><span>400</span><span>800</span><span>1600</span><span>3200</span><span>6400</span><span>12800</span>
+                    </div>
+                    <p class="control-hint">Higher ISO = brighter but noisier image</p>
+                </div>
+
+                <!-- Aperture Control -->
+                <div class="control-group" id="control-aperture">
+                    <div class="control-label-row">
+                        <label class="control-label">
+                            <span class="control-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <circle cx="12" cy="12" r="4"/>
+                                    <path d="M12 2v6M12 16v6M2 12h6M16 12h6"/>
+                                </svg>
+                            </span>
+                            Aperture
+                        </label>
+                        <span id="aperture-value" class="control-value">f/8</span>
+                    </div>
+                    <input type="range" id="aperture-slider" class="slider" min="0" max="8" step="1" value="5">
+                    <div class="slider-labels">
+                        <span>f/1.4</span><span>f/2</span><span>f/2.8</span><span>f/4</span><span>f/5.6</span><span>f/8</span><span>f/11</span><span>f/16</span><span>f/22</span>
+                    </div>
+                    <p class="control-hint">Lower f-number = more light, blurrier background</p>
+                </div>
+
+                <!-- Shutter Speed Control -->
+                <div class="control-group" id="control-shutter">
+                    <div class="control-label-row">
+                        <label class="control-label">
+                            <span class="control-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                            </span>
+                            Shutter Speed
+                        </label>
+                        <span id="shutter-value" class="control-value">1/125</span>
+                    </div>
+                    <input type="range" id="shutter-slider" class="slider" min="0" max="15" step="1" value="8">
+                    <div class="slider-labels shutter-labels">
+                        <span>30s</span><span></span><span>8s</span><span></span><span>2s</span><span></span><span>1/2</span><span></span><span>1/8</span><span></span><span>1/30</span><span></span><span>1/125</span><span></span><span>1/500</span><span></span>
+                    </div>
+                    <p class="control-hint">Slower shutter = more light, more motion blur</p>
+                </div>
+
+                <!-- White Balance (bonus) -->
+                <div class="control-group" id="control-wb">
+                    <div class="control-label-row">
+                        <label class="control-label">
+                            <span class="control-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M12 3v1m0 16v1m-8-9H3m18 0h-1M5.6 5.6l.7.7m11.4 11.4l.7.7M5.6 18.4l.7-.7M17.7 6.3l.7-.7"/>
+                                    <circle cx="12" cy="12" r="4"/>
+                                </svg>
+                            </span>
+                            White Balance
+                        </label>
+                        <span id="wb-value" class="control-value">5500K</span>
+                    </div>
+                    <input type="range" id="wb-slider" class="slider wb-slider" min="0" max="6" step="1" value="3">
+                    <div class="slider-labels">
+                        <span>3000K</span><span>3500K</span><span>4500K</span><span>5500K</span><span>6500K</span><span>7500K</span><span>9000K</span>
+                    </div>
+                    <p class="control-hint">Color temperature: warm (low) ↔ cool (high)</p>
+                </div>
+
+                <!-- Shoot Button -->
+                <button id="btn-shoot" class="btn-shoot">
+                    <div class="btn-shoot-inner">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <circle cx="12" cy="12" r="6" fill="currentColor"/>
+                        </svg>
+                        <span>Take Shot</span>
+                    </div>
+                </button>
+            </section>
+        </main>
+
+        <!-- Result Modal -->
+        <div id="result-modal" class="result-modal hidden">
+            <div class="result-backdrop"></div>
+            <div class="result-content">
+                <div class="result-header">
+                    <div id="result-grade" class="result-grade">
+                        <span class="grade-letter">B+</span>
+                        <span class="grade-label">Good Shot!</span>
+                    </div>
+                </div>
+                <div class="result-body">
+                    <div class="result-image-container">
+                        <img id="result-image" src="" alt="Your photo result" class="result-image">
+                        <canvas id="noise-canvas" class="noise-overlay"></canvas>
+                    </div>
+                    <div class="result-feedback">
+                        <h3>📋 Feedback</h3>
+                        <div id="feedback-list" class="feedback-list"></div>
+                        <div class="result-settings-comparison">
+                            <h4>Your Settings vs Recommended</h4>
+                            <div id="settings-comparison" class="settings-comparison"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="result-actions">
+                    <button id="btn-retry" class="btn-action btn-retry">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="1,4 1,10 7,10"/>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                        </svg>
+                        Try Again
+                    </button>
+                    <button id="btn-next" class="btn-action btn-next">
+                        Next Scene
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completion Modal -->
+        <div id="completion-modal" class="result-modal hidden">
+            <div class="result-backdrop"></div>
+            <div class="completion-content">
+                <div class="completion-icon">🎉</div>
+                <h2>Session Complete!</h2>
+                <p class="completion-subtitle">You've practiced all 12 scenes</p>
+                <div id="final-score" class="final-score">
+                    <span class="final-score-label">Final Score</span>
+                    <span class="final-score-value">0</span>
+                    <span class="final-score-max">/ 1200</span>
+                </div>
+                <div id="completion-stats" class="completion-stats"></div>
+                <button id="btn-restart" class="btn-action btn-next">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="1,4 1,10 7,10"/>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                    </svg>
+                    Start New Session
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="result-modal hidden">
+        <div class="result-backdrop" id="upload-backdrop"></div>
+        <div class="upload-content">
+            <div class="upload-header">
+                <h2>Practice With Your Own Photo</h2>
+                <p>Upload any photo and practice matching the ideal camera settings for that scene.</p>
+            </div>
+            <div id="upload-dropzone" class="upload-dropzone">
+                <div class="dropzone-inner">
+                    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="6" y="10" width="36" height="28" rx="4"/>
+                        <circle cx="24" cy="24" r="7"/>
+                        <circle cx="24" cy="24" r="3.5" fill="currentColor" stroke="none"/>
+                        <path d="M16 10V6h16v4"/>
+                        <circle cx="36" cy="15" r="2" fill="currentColor" stroke="none"/>
+                    </svg>
+                    <p class="dropzone-text">Drag & drop your photo here</p>
+                    <p class="dropzone-sub">or</p>
+                    <button id="btn-choose-file" class="btn-action btn-next">Choose File</button>
+                    <p class="dropzone-hint">JPG, PNG, WEBP · Max 20MB</p>
+                </div>
+            </div>
+            <div id="upload-preview-area" class="upload-preview-area hidden">
+                <img id="upload-preview-img" src="" alt="Preview">
+                <div class="upload-preview-meta">
+                    <div class="upload-scene-config">
+                        <h3>Set Scene Details</h3>
+                        <div class="upload-field">
+                            <label>Scene Name</label>
+                            <input type="text" id="upload-scene-name" placeholder="e.g. My Golden Hour Shot" maxlength="40">
+                        </div>
+                        <div class="upload-field">
+                            <label>Scene Type</label>
+                            <select id="upload-scene-category">
+                                <option value="Landscape">Landscape</option>
+                                <option value="Portrait">Portrait</option>
+                                <option value="Sports">Sports/Action</option>
+                                <option value="Night">Night</option>
+                                <option value="Macro">Macro</option>
+                                <option value="Low Light">Low Light</option>
+                                <option value="Street">Street</option>
+                                <option value="Wildlife">Wildlife</option>
+                                <option value="Long Exposure">Long Exposure</option>
+                                <option value="Custom">Other/Custom</option>
+                            </select>
+                        </div>
+                        <div class="upload-field">
+                            <label>Description <span class="optional">(optional)</span></label>
+                            <input type="text" id="upload-scene-desc" placeholder="What's the challenge of this shot?" maxlength="120">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="upload-actions">
+                <button id="btn-upload-cancel" class="btn-action btn-retry">Cancel</button>
+                <button id="btn-upload-start" class="btn-action btn-next" disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <circle cx="12" cy="12" r="6" fill="currentColor"/>
+                    </svg>
+                    Start Practicing
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/scenes.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
